@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Bella Pizza</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header>
+    <h1>La Bella Pizza</h1>
+    <nav>
+      <ul>
+        <li><a href="#">Accueil</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#" id="ouvrirPanier">Panier (<span id="panierCount">0</span>)</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h2>Bienvenue chez La Bella Pizza !</h2>
+      <p>Des pizzas fraîches, cuites au feu de bois 🔥</p>
+    </section>
+
+    <section class="menu" id="menu">
+      <h2>Nos Meilleures Pizzas</h2>
+      <div class="pizza-list">
+        <div class="pizza-card">
+          <img src="assets/margherita.jpg" alt="Pizza Margherita" />
+          <h3>Margherita</h3>
+          <p>Tomate, mozzarella, basilic</p>
+          <span>9,50 €</span>
+          <button class="order-btn">Commander</button>
+        </div>
+
+        <div class="pizza-card">
+          <img src="assets/pepperoni.jpg" alt="Pizza Pepperoni" />
+          <h3>Pepperoni</h3>
+          <p>Tomate, mozzarella, pepperoni</p>
+          <span>10,90 €</span>
+          <button class="order-btn">Commander</button>
+        </div>
+
+        <div class="pizza-card">
+          <img src="assets/4fromages.jpg" alt="Pizza 4 Fromages" />
+          <h3>4 Fromages</h3>
+          <p>Tomate, mozzarella, gorgonzola, chèvre, parmesan</p>
+          <span>11,50 €</span>
+          <button class="order-btn">Commander</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="why">
+      <h2>Pourquoi choisir la Bella Pizza</h2>
+      <p>
+        Nos ingrédients sont 100% frais, notre pâte est faite maison, et chaque
+        pizza est préparée avec amour ♥ par notre chef italien
+      </p>
+    </section>
+
+    <section class="contact" id="contact">
+      <h2>Contactez-nous</h2>
+      <p>Email : contact@labellapizza.fr</p>
+      <p>Téléphone : 01 23 45 67 89</p>
+    </section>
+
+    <form class="contact-form">
+      <input type="text" placeholder="Votre nom" required />
+      <input type="email" placeholder="Votre email" required />
+      <textarea placeholder="Votre message" rows="4" required></textarea>
+      <button type="submit">Envoyer</button>
+    </form>
+  </main>
+
+  <footer>
+    <p>© 2025 La Bella Pizza. Tous droits réservés.</p>
+  </footer>
+
+  <!-- Modale de commande -->
+  <div class="modal" id="commandeModal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <p id="commandeMessage">Votre commande a bien été prise en compte !</p>
+    </div>
+  </div>
+
+  <!-- Modale Panier -->
+  <div id="panierModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closePanier">&times;</span>
+      <h2>Votre Panier</h2>
+      <ul id="panierListe"></ul>
+      <p>Total : <strong id="panierTotal">0,00 €</strong></p>
+    </div>
+  </div>
+
+  <!-- Script panier -->
+  <script>
+    const panier = [];
+
+    const boutonsCommande = document.querySelectorAll('.order-btn');
+    const fenetreCommande = document.getElementById('commandeModal');
+    const messageCommande = document.getElementById('commandeMessage');
+    const boutonFermer = document.querySelector('.close-btn');
+    const panierListe = document.getElementById('panierListe');
+    const compteurPanier = document.getElementById('panierCount');
+
+    const boutonOuvrirPanier = document.getElementById('ouvrirPanier');
+const panierModal = document.getElementById('panierModal');
+const boutonFermerPanier = document.getElementById('closePanier');
+
+boutonOuvrirPanier.addEventListener('click', (e) => {
+  e.preventDefault(); // empêche le scroll en haut de page
+  panierModal.style.display = 'flex';
+});
+
+boutonFermerPanier.addEventListener('click', () => {
+  panierModal.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+  if (e.target === panierModal) {
+    panierModal.style.display = 'none';
+  }
+});
+
+function mettreAJourPanier() {
+  panierListe.innerHTML = ''; // Vide la liste affichée
+  let total = 0;
+
+  panier.forEach((item, index) => {
+    const li = document.createElement('li');
+    li.textContent = `${item.nom} - ${item.prix}`;
+
+    // Bouton supprimer
+    const btnSupprimer = document.createElement('button');
+    btnSupprimer.textContent = '❌';
+    btnSupprimer.style.marginLeft = '10px';
+    btnSupprimer.style.cursor = 'pointer';
+    btnSupprimer.title = 'Supprimer du panier';
+
+    btnSupprimer.addEventListener('click', () => {
+      panier.splice(index, 1);  // Supprime l’item du tableau
+      mettreAJourPanier();      // Rafraîchit la liste affichée
+    });
+
+    li.appendChild(btnSupprimer);
+    panierListe.appendChild(li);
+
+    // ➕ On ajoute le prix de cette pizza au total
+    const prixNum = parseFloat(item.prix.replace(',', '.').replace('€', '').trim());
+    total += prixNum;
+  });
+
+  // 🔁 On met à jour l'affichage du total
+  document.getElementById('panierTotal').textContent = `${total.toFixed(2).replace('.', ',')} €`;
+
+  // 🔢 Met à jour le nombre dans le bouton panier
+  document.getElementById('panierCount').textContent = panier.length;
+}
+
+    boutonsCommande.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const carte = btn.parentElement;
+        const nomPizza = carte.querySelector('h3').textContent;
+        const prixPizza = carte.querySelector('span').textContent;
+
+        panier.push({ nom: nomPizza, prix: prixPizza });
+        mettreAJourPanier();
+
+        messageCommande.textContent = `Merci pour votre commande de ${nomPizza} 🍕!`;
+        fenetreCommande.style.display = 'flex';
+      });
+    });
+
+    boutonFermer.addEventListener('click', () => {
+      fenetreCommande.style.display = 'none';
+    });
+
+    fenetreCommande.addEventListener('click', e => {
+      if (e.target === fenetreCommande) {
+        fenetreCommande.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
